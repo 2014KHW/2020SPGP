@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         // LowerCamelCase : 함수, 변수 이름
         // 모두 대문자 : 상수
         // 약어를 쓰는 경우 : 내용이 몇 줄 안될 정도로 간단할 경우
+        // Git Project
 
         Log.d(TAG, "Message from onCreate()");
         TextView tv = findViewById(R.id.textView3);
