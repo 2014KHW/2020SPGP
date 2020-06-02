@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    private Resources resources;
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -22,8 +24,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GameView gameView = new GameView(this );
-        setContentView(gameView); // Camel Case
+        setContentView(gameView);
 
+        resources = getResources();
+
+        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 50, 75));
 //        GameObject go = new GameObject(getResources(), R.mipmap.crocodile, 0, 0);
 //        go.draw(canvas);
     }

@@ -9,15 +9,29 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
 public class GameView extends View {
+    static private ArrayList<GameObject> tiles = new ArrayList<>();
+
     public GameView(Context context) {
         super(context);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Bitmap testBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.crocodile);
-        canvas.drawBitmap(testBitmap, 0, 0, null);
+        if (tiles.size() <= 0)
+            return;
+
+        for(GameObject o : tiles){
+            o.draw(canvas);
+        }
+//        Bitmap testBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.crocodile);
+//        canvas.drawBitmap(testBitmap, 0, 0, null);
 //        super.onDraw(canvas);
+    }
+
+    public void addTile(GameObject gameObject){
+        tiles.add(gameObject);
     }
 }
