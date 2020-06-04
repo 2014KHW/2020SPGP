@@ -7,14 +7,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
+import android.view.MotionEvent;
 
 public class GameObject {
     private static final int TILE_WIDTH = 100;
     private static final int TILE_HEIGHT = 150;
+    private static final String TAG = GameObject.class.getSimpleName();
 
     private Bitmap bitmap;
     private final Rect borderRect;
     private Paint paint;
+    private int paintStrokeWidth;
 
     private int x;
     private int y;
@@ -29,7 +33,8 @@ public class GameObject {
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(10);
+        this.paintStrokeWidth = 10;
+        paint.setStrokeWidth(paintStrokeWidth);
         paint.setAntiAlias(true);
         this.paint = paint;
 
@@ -47,5 +52,33 @@ public class GameObject {
     void draw(Canvas canvas){
         canvas.drawBitmap(bitmap, x, y, null);
         canvas.drawRect(borderRect, paint);
+    }
+
+    private boolean touchesImage(int x, int y){
+        if((this.x + TILE_WIDTH < x) || (x < this.x))
+            return false;
+        if((this.y + TILE_HEIGHT < y) || (y < this.y))
+            return false;
+        Log.d(TAG, "It's True!");
+        return true;
+    }
+
+    private void selectImage(){
+        this.paint.setColor(Color.RED);
+        paintStrokeWidth = 20;
+        this.paint.setStrokeWidth(paintStrokeWidth);
+    }
+
+    public void onTouchEvent(MotionEvent event){
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN :
+                int downX = (int)event.getX();
+                int downY = (int)event.getY();
+                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
+                if(touchesImage(downX, downY))
+                    selectImage();
+            default:
+                break;
+        }
     }
 }
