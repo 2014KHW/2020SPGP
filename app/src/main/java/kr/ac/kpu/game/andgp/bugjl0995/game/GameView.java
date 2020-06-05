@@ -17,10 +17,12 @@ import java.util.ArrayList;
 public class GameView extends View {
     private static final String TAG = GameView.class.getSimpleName();
     static private ArrayList<GameObject> tiles = new ArrayList<>();
+    static private int selectedTileIndex;
 
     public GameView(Context context) {
         super(context);
         postFrameCallback();
+        selectedTileIndex = -1;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class GameView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         for(GameObject o : tiles){
-            o.onTouchEvent(event);
+            o.onTouchEvent(event, this);
         }
 //        return super.onTouchEvent(event);
         return false;
@@ -57,5 +59,13 @@ public class GameView extends View {
 
     public void addTile(GameObject gameObject){
         tiles.add(gameObject);
+    }
+    public void setCurrentTile(GameObject gameObject){
+        if(selectedTileIndex != -1)
+            tiles.get(selectedTileIndex).unselectImage();
+        selectedTileIndex = tiles.indexOf(gameObject);
+//        Log.d(TAG, "selected Image Index : " + selectedTileIndex);
+        if(selectedTileIndex != -1)
+            gameObject.selectImage();
     }
 }

@@ -10,6 +10,8 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
+
 public class GameObject {
     private static final int TILE_WIDTH = 100;
     private static final int TILE_HEIGHT = 150;
@@ -59,24 +61,29 @@ public class GameObject {
             return false;
         if((this.y + TILE_HEIGHT < y) || (y < this.y))
             return false;
-        Log.d(TAG, "It's True!");
+//        Log.d(TAG, "It's True!");
         return true;
     }
 
-    private void selectImage(){
+    public void selectImage(){
         this.paint.setColor(Color.RED);
         paintStrokeWidth = 20;
         this.paint.setStrokeWidth(paintStrokeWidth);
     }
+    public void unselectImage(){
+        this.paint.setColor(Color.BLACK);
+        paintStrokeWidth = 10;
+        this.paint.setStrokeWidth(paintStrokeWidth);
+    }
 
-    public void onTouchEvent(MotionEvent event){
+    public void onTouchEvent(MotionEvent event, GameView currentView){
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN :
                 int downX = (int)event.getX();
                 int downY = (int)event.getY();
-                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
+//                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
                 if(touchesImage(downX, downY))
-                    selectImage();
+                    currentView.setCurrentTile(this);
             default:
                 break;
         }

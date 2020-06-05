@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         resources = getResources();
 
         gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 50, 75));
+        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 150, 75));
 //        GameObject go = new GameObject(getResources(), R.mipmap.crocodile, 0, 0);
 //        go.draw(canvas);
     }
