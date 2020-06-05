@@ -68,4 +68,8 @@ public class GameView extends View {
         if(selectedTileIndex != -1)
             gameObject.selectImage();
     }
+
+    public void selectDestroy(){
+
+    }
 }

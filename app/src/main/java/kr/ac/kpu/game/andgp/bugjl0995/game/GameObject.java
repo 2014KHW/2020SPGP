@@ -24,6 +24,8 @@ public class GameObject {
 
     private int x;
     private int y;
+    private int rectX;
+    private int rectY;
 
     GameObject(Resources resources, int resId, int x, int y){
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
@@ -46,20 +48,22 @@ public class GameObject {
                 Bitmap.Config.ARGB_8888
         );
 
-        this.borderRect = new Rect(x + 5, y + 5,
-                x + borderBitmap.getWidth() - 5,
-                y + borderBitmap.getHeight() - 5);
+        this.rectX = x * TILE_WIDTH;
+        this.rectY = y * TILE_HEIGHT;
+        this.borderRect = new Rect(rectX + 5, rectY + 5,
+                rectX + borderBitmap.getWidth() - 5,
+                rectY + borderBitmap.getHeight() - 5);
     }
 
     void draw(Canvas canvas){
-        canvas.drawBitmap(bitmap, x, y, null);
+        canvas.drawBitmap(bitmap, rectX, rectY, null);
         canvas.drawRect(borderRect, paint);
     }
 
     private boolean touchesImage(int x, int y){
-        if((this.x + TILE_WIDTH < x) || (x < this.x))
+        if((rectX + TILE_WIDTH < x) || (x < rectX))
             return false;
-        if((this.y + TILE_HEIGHT < y) || (y < this.y))
+        if((rectY + TILE_HEIGHT < y) || (y < rectY))
             return false;
 //        Log.d(TAG, "It's True!");
         return true;
