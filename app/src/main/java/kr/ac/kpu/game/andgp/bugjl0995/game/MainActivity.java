@@ -28,8 +28,10 @@ public class MainActivity extends AppCompatActivity {
 
         resources = getResources();
 
-        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 1, 1));
-        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 2, 1));
+        int tileWidth = gameView.windowWidth / gameView.MAX_ROW;
+        int tileHeight = gameView.windowHeight / gameView.MAX_COLUMN;
+        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 1, 1, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 2, 1, tileWidth, tileHeight));
 //        GameObject go = new GameObject(getResources(), R.mipmap.crocodile, 0, 0);
 //        go.draw(canvas);
     }

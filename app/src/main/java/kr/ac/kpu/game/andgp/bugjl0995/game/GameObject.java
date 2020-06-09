@@ -13,8 +13,6 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 
 public class GameObject {
-    private static final int TILE_WIDTH = 100;
-    private static final int TILE_HEIGHT = 150;
     private static final String TAG = GameObject.class.getSimpleName();
 
     private Bitmap bitmap;
@@ -27,9 +25,9 @@ public class GameObject {
     private int rectX;
     private int rectY;
 
-    GameObject(Resources resources, int resId, int x, int y){
+    GameObject(Resources resources, int resId, int x, int y, int width, int height){
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
-        bitmap = Bitmap.createScaledBitmap(bitmap, TILE_WIDTH, TILE_HEIGHT, true);
+        bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
 
         this.x = x;
         this.y = y;
@@ -48,8 +46,8 @@ public class GameObject {
                 Bitmap.Config.ARGB_8888
         );
 
-        this.rectX = x * TILE_WIDTH;
-        this.rectY = y * TILE_HEIGHT;
+        this.rectX = x * width;
+        this.rectY = y * height;
         this.borderRect = new Rect(rectX + 5, rectY + 5,
                 rectX + borderBitmap.getWidth() - 5,
                 rectY + borderBitmap.getHeight() - 5);
@@ -60,14 +58,14 @@ public class GameObject {
         canvas.drawRect(borderRect, paint);
     }
 
-    private boolean touchesImage(int x, int y){
-        if((rectX + TILE_WIDTH < x) || (x < rectX))
-            return false;
-        if((rectY + TILE_HEIGHT < y) || (y < rectY))
-            return false;
+//    private boolean touchesImage(int x, int y){
+//        if((rectX + TILE_WIDTH < x) || (x < rectX))
+//            return false;
+//        if((rectY + TILE_HEIGHT < y) || (y < rectY))
+//            return false;
 //        Log.d(TAG, "It's True!");
-        return true;
-    }
+//        return true;
+//    }
 
     public void selectImage(){
         this.paint.setColor(Color.RED);
@@ -80,16 +78,23 @@ public class GameObject {
         this.paint.setStrokeWidth(paintStrokeWidth);
     }
 
-    public void onTouchEvent(MotionEvent event, GameView currentView){
-        switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN :
-                int downX = (int)event.getX();
-                int downY = (int)event.getY();
+//    public void onTouchEvent(MotionEvent event, GameView currentView){
+//        switch (event.getAction()){
+//            case MotionEvent.ACTION_DOWN :
+//                int downX = (int)event.getX();
+//                int downY = (int)event.getY();
 //                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
-                if(touchesImage(downX, downY))
-                    currentView.setCurrentTile(this);
-            default:
-                break;
-        }
+//                if(touchesImage(downX, downY))
+//                    currentView.setCurrentTile(this);
+//            default:
+//                break;
+//        }
+//    }
+
+    public int getX(){
+        return x;
+    }
+    public int getY(){
+        return y;
     }
 }
