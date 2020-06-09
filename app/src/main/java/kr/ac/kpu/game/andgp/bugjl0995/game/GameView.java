@@ -1,27 +1,44 @@
 package kr.ac.kpu.game.andgp.bugjl0995.game;
 
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GameView extends View {
     private static final String TAG = GameView.class.getSimpleName();
     static private ArrayList<GameObject> tiles = new ArrayList<>();
+    private final int MAX_ROW = 10;
+    private final int MAX_COLUMN = 9;
+    private int windowWidth;
+    private int windowHeight;
+
+//    static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private int selectedTileIndex;
 
     public GameView(Context context) {
         super(context);
         postFrameCallback();
+
+        WindowManager wm = (WindowManager) getContext().getSystemService(Service.WINDOW_SERVICE);
+        Point windowSize = new Point();
+        wm.getDefaultDisplay().getSize(windowSize);
+        windowWidth = windowSize.x;
+        windowHeight = windowSize.y;
+
         selectedTileIndex = -1;
     }
 
