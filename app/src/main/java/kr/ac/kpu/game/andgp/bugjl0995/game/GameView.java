@@ -27,6 +27,7 @@ public class GameView extends View {
     public final int windowHeight;
 
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
+    static private HashMap<GameObject, GameObject> tileDestroyable = new HashMap<>();
     static private GameObject selectedTile;
 
     public GameView(Context context) {
@@ -69,6 +70,7 @@ public class GameView extends View {
             @Override
             public void doFrame(long frameTimeNanos) {
                 invalidate();
+                getDestroyableTiles();
                 postFrameCallback();
             }
         });
@@ -82,6 +84,8 @@ public class GameView extends View {
 
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN :
+                Log.d(TAG, "my Destroyable Tile List : " + tileDestroyable.size() / 2);
+
                 int downX = (int)event.getX();
                 int downY = (int)event.getY();
 //                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
@@ -237,6 +241,28 @@ public class GameView extends View {
         result = columnTile.get(y);
 
         return result;
+    }
+
+    public void getDestroyableTiles(){
+        for(int srcY = 0; srcY < MAX_COLUMN; srcY++){
+            for(int srcX = 0; srcX < MAX_ROW; srcX++){
+                if(tileFind(srcX, srcY) == null)
+                    continue;
+
+                for(int dstY = srcY; dstY < MAX_COLUMN; dstY++){
+                    for(int dstX = srcX; dstX < MAX_ROW; dstX++) {
+                        if(tileFind(dstX, dstY) == null)
+                            continue;
+
+                        ArrayList<Point> findResult = Destroyable(srcX, srcY, dstX, dstY, null, null, 0);
+                        if(findResult != null){
+                            tileDestroyable.put(tileFind(srcX, srcY), tileFind(dstX, dstY));
+                            tileDestroyable.put(tileFind(dstX, dstY), tileFind(srcX, srcY));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void selectDestroy(GameObject currentObject, GameObject prevObject){
