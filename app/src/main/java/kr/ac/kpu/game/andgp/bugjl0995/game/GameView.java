@@ -87,7 +87,7 @@ public class GameView extends View {
 //                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
                 int downIndexX = downX / (windowWidth / MAX_ROW);
                 int downIndexY = downY / (windowHeight / MAX_COLUMN);
-                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
+//                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
                 HashMap<Integer, GameObject> columnTileMap = tileObjectMap.get(downIndexX);
 
                 if(columnTileMap == null){
@@ -99,6 +99,10 @@ public class GameView extends View {
                 GameObject currentTile = columnTileMap.get(downIndexY);
 
                 if(selectedTile != null){
+                    ArrayList<GameObject> findResult = Destroyable(currentTile.getX(), currentTile.getY(),
+                                                                   selectedTile.getX(), selectedTile.getY(),
+                                                                   null, null, 0);
+                    Log.d(TAG, "findResult : " + findResult);
                     selectedTile.unselectImage();
                     selectedTile = null;
                 }
@@ -126,14 +130,112 @@ public class GameView extends View {
         if(oldObject == null)
             columnTileMap.put(gameObject.getY(), gameObject);
     }
-//    public void setCurrentTile(GameObject gameObject){
-//        if(selectedTileIndex != -1)
-//            tiles.get(selectedTileIndex).unselectImage();
-//        selectedTileIndex = tiles.indexOf(gameObject);
-//        Log.d(TAG, "selected Image Index : " + selectedTileIndex);
-//        if(selectedTileIndex != -1)
-//            gameObject.selectImage();
-//    }
+
+    enum Direction {UP, LEFT, DOWN, RIGHT, END};
+    public ArrayList<GameObject> Destroyable(int srcX, int srcY, int dstX, int dstY, Direction curDir, Direction prevDir , int turnCount){
+        if(curDir != null && prevDir != null)
+            if(curDir != prevDir)
+                turnCount++;
+
+        if(turnCount >= 3)
+            return null;
+
+        if(prevDir != null && prevDir != curDir){
+            if((prevDir.ordinal() + curDir.ordinal()) % 2 == 0)
+                return null;
+        }
+        if(curDir != null){
+//            Log.d(TAG, "current direction : " + curDir.ordinal());
+            switch (curDir.ordinal()){
+                case 0://UP
+                    srcY--;
+                    break;
+                case 1://LEFT
+                    srcX--;
+                    break;
+                case 2://DOWN
+                    srcY++;
+                    break;
+                case 3://RIGHT
+                    srcX++;
+                    break;
+            }
+        }
+
+        if(srcX < 0 || srcX >= MAX_ROW)
+            return null;
+        if(srcY < 0 || srcY >= MAX_COLUMN)
+            return null;
+
+        GameObject currentTile = tileFind(srcX, srcY);
+        if(currentTile != null)
+        {
+            if(srcX == dstX && srcY == dstY){
+//                Log.d(TAG, "Found Path!");
+                ArrayList<GameObject> result = new ArrayList<>();
+                result.add(currentTile);
+                return result;
+            }
+            else if(curDir != null)
+                return null;
+        }
+
+        if(turnCount >= 2){
+            ArrayList<GameObject> currentPath;
+            currentPath = Destroyable(srcX, srcY, dstX, dstY, curDir, curDir, turnCount);
+            if(currentPath == null)
+                return null;
+            else{
+                currentPath.add(currentTile);
+                return currentPath;
+            }
+        }
+        else {
+
+            ArrayList<GameObject> selectedPath = null;
+            ArrayList<GameObject> comparePath = null;
+
+            selectedPath = Destroyable(srcX, srcY, dstX, dstY, Direction.UP, curDir, turnCount);
+            comparePath = Destroyable(srcX, srcY, dstX, dstY, Direction.LEFT, curDir, turnCount);
+            if(comparePath != null){
+                if(selectedPath != null)
+                    selectedPath = (selectedPath.size() < comparePath.size()) ? selectedPath : comparePath;
+                else
+                    selectedPath = comparePath;
+            }
+
+            comparePath = Destroyable(srcX, srcY, dstX, dstY, Direction.DOWN, curDir, turnCount);
+            if(comparePath != null){
+                if(selectedPath != null)
+                    selectedPath = (selectedPath.size() < comparePath.size()) ? selectedPath : comparePath;
+                else
+                    selectedPath = comparePath;
+            }
+
+
+            comparePath = Destroyable(srcX, srcY, dstX, dstY, Direction.RIGHT, curDir, turnCount);
+            if(comparePath != null){
+                if(selectedPath != null)
+                    selectedPath = (selectedPath.size() < comparePath.size()) ? selectedPath : comparePath;
+                else
+                    selectedPath = comparePath;
+            }
+
+            return selectedPath;
+        }
+    }
+
+    private GameObject tileFind(int x, int y){
+        HashMap<Integer, GameObject> columnTile;
+        columnTile = tileObjectMap.get(x);
+        if(columnTile == null)
+            return null;
+
+        GameObject result;
+        result = columnTile.get(y);
+
+        return result;
+    }
 
     public void selectDestroy(){
 

@@ -58,15 +58,6 @@ public class GameObject {
         canvas.drawRect(borderRect, paint);
     }
 
-//    private boolean touchesImage(int x, int y){
-//        if((rectX + TILE_WIDTH < x) || (x < rectX))
-//            return false;
-//        if((rectY + TILE_HEIGHT < y) || (y < rectY))
-//            return false;
-//        Log.d(TAG, "It's True!");
-//        return true;
-//    }
-
     public void selectImage(){
         this.paint.setColor(Color.RED);
         paintStrokeWidth = 20;
