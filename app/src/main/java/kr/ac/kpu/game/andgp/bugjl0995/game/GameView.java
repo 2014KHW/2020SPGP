@@ -99,7 +99,7 @@ public class GameView extends View {
                 GameObject currentTile = columnTileMap.get(downIndexY);
 
                 if(selectedTile != null){
-                    ArrayList<GameObject> findResult = Destroyable(currentTile.getX(), currentTile.getY(),
+                    ArrayList<Point> findResult = Destroyable(currentTile.getX(), currentTile.getY(),
                                                                    selectedTile.getX(), selectedTile.getY(),
                                                                    null, null, 0);
                     Log.d(TAG, "findResult : " + findResult);
@@ -132,7 +132,7 @@ public class GameView extends View {
     }
 
     enum Direction {UP, LEFT, DOWN, RIGHT, END};
-    public ArrayList<GameObject> Destroyable(int srcX, int srcY, int dstX, int dstY, Direction curDir, Direction prevDir , int turnCount){
+    public ArrayList<Point> Destroyable(int srcX, int srcY, int dstX, int dstY, Direction curDir, Direction prevDir , int turnCount){
         if(curDir != null && prevDir != null)
             if(curDir != prevDir)
                 turnCount++;
@@ -172,8 +172,8 @@ public class GameView extends View {
         {
             if(srcX == dstX && srcY == dstY){
 //                Log.d(TAG, "Found Path!");
-                ArrayList<GameObject> result = new ArrayList<>();
-                result.add(currentTile);
+                ArrayList<Point> result = new ArrayList<>();
+                result.add(new Point(srcX, srcY));
                 return result;
             }
             else if(curDir != null)
@@ -181,19 +181,19 @@ public class GameView extends View {
         }
 
         if(turnCount >= 2){
-            ArrayList<GameObject> currentPath;
+            ArrayList<Point> currentPath;
             currentPath = Destroyable(srcX, srcY, dstX, dstY, curDir, curDir, turnCount);
             if(currentPath == null)
                 return null;
             else{
-                currentPath.add(currentTile);
+                currentPath.add(new Point(srcX, srcY));
                 return currentPath;
             }
         }
         else {
 
-            ArrayList<GameObject> selectedPath = null;
-            ArrayList<GameObject> comparePath = null;
+            ArrayList<Point> selectedPath = null;
+            ArrayList<Point> comparePath = null;
 
             selectedPath = Destroyable(srcX, srcY, dstX, dstY, Direction.UP, curDir, turnCount);
             comparePath = Destroyable(srcX, srcY, dstX, dstY, Direction.LEFT, curDir, turnCount);
@@ -221,6 +221,8 @@ public class GameView extends View {
                     selectedPath = comparePath;
             }
 
+            if(selectedPath != null)
+                selectedPath.add(new Point(srcX, srcY));
             return selectedPath;
         }
     }
@@ -237,7 +239,7 @@ public class GameView extends View {
         return result;
     }
 
-    public void selectDestroy(){
+    public void selectDestroy(GameObject currentObject, GameObject prevObject){
 
     }
 }
