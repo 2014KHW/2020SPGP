@@ -2,18 +2,14 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
 
 import android.app.Service;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-
-import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +23,7 @@ public class GameView extends View {
     public final int windowHeight;
 
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
-    static private HashMap<GameObject, GameObject> tileDestroyable = new HashMap<>();
+    static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
     static private GameObject selectedTile;
 
     public GameView(Context context) {
@@ -137,6 +133,10 @@ public class GameView extends View {
 
     enum Direction {UP, LEFT, DOWN, RIGHT, END};
     public ArrayList<Point> Destroyable(int srcX, int srcY, int dstX, int dstY, Direction curDir, Direction prevDir , int turnCount){
+        if(curDir == null && prevDir == null)
+            if(srcX == dstX && srcY == dstY)
+                return null;
+
         if(curDir != null && prevDir != null)
             if(curDir != prevDir)
                 turnCount++;
@@ -246,18 +246,26 @@ public class GameView extends View {
     public void getDestroyableTiles(){
         for(int srcY = 0; srcY < MAX_COLUMN; srcY++){
             for(int srcX = 0; srcX < MAX_ROW; srcX++){
-                if(tileFind(srcX, srcY) == null)
+                GameObject srcTile = tileFind(srcX, srcY);
+                if(srcTile == null)
                     continue;
 
-                for(int dstY = srcY; dstY < MAX_COLUMN; dstY++){
-                    for(int dstX = srcX; dstX < MAX_ROW; dstX++) {
-                        if(tileFind(dstX, dstY) == null)
+                for(int dstY = 0; dstY < MAX_COLUMN; dstY++){
+                    for(int dstX = 0; dstX < MAX_ROW; dstX++) {
+                        GameObject dstTile = tileFind(dstX, dstY);
+                        if(dstTile == null)
+                            continue;
+                        if(srcTile.getResourceId() != dstTile.getResourceId())
                             continue;
 
                         ArrayList<Point> findResult = Destroyable(srcX, srcY, dstX, dstY, null, null, 0);
                         if(findResult != null){
-                            tileDestroyable.put(tileFind(srcX, srcY), tileFind(dstX, dstY));
-                            tileDestroyable.put(tileFind(dstX, dstY), tileFind(srcX, srcY));
+                            Pair pairTile = new Pair(srcTile, dstTile);
+                            if(tileDestroyable.size() > 0)
+                                if(tileDestroyable.contains(pairTile))
+                                    continue;
+                            tileDestroyable.add(new Pair(srcTile, dstTile));
+                            tileDestroyable.add(new Pair(dstTile, srcTile));
                         }
                     }
                 }

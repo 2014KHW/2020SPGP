@@ -24,6 +24,7 @@ public class GameObject {
     private int y;
     private int rectX;
     private int rectY;
+    private int resId;
 
     GameObject(Resources resources, int resId, int x, int y, int width, int height){
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
@@ -39,6 +40,7 @@ public class GameObject {
         paint.setStrokeWidth(paintStrokeWidth);
         paint.setAntiAlias(true);
         this.paint = paint;
+        this.resId = resId;
 
         Bitmap borderBitmap = Bitmap.createBitmap(
                 bitmap.getWidth() + 10,
@@ -88,4 +90,5 @@ public class GameObject {
     public int getY(){
         return y;
     }
+    public int getResourceId() {return resId;}
 }
