@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 public class GameObject {
     private static final String TAG = GameObject.class.getSimpleName();
 
@@ -26,6 +28,35 @@ public class GameObject {
     private int rectY;
     private int resId;
 
+    private int tileWidth;
+    private int tileHeight;
+
+    private int frame = -1;
+    static private ArrayList<Bitmap> destroyAnimSheet = null;
+    static private int animResId;
+
+    private long frameNanos;
+    private boolean firstUpdate = true;
+
+    private Status status;
+
+    public void update(long frameTimeNanos) {
+        if(firstUpdate){
+            frameNanos = frameTimeNanos;
+            firstUpdate = false;
+        }
+
+        if(this.status != Status.destroyed)
+            return;
+
+        Log.d(TAG, "frameTime : " + (frameTimeNanos - frameNanos));
+        if(frameTimeNanos - frameNanos > 50000000){
+            frame = (frame + 1) % 6;
+            frameNanos = frameTimeNanos;
+        }
+    }
+
+    public enum Status{normal, selected, destroyed, END}
     GameObject(Resources resources, int resId, int x, int y, int width, int height){
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
@@ -53,11 +84,38 @@ public class GameObject {
         this.borderRect = new Rect(rectX + 5, rectY + 5,
                 rectX + borderBitmap.getWidth() - 5,
                 rectY + borderBitmap.getHeight() - 5);
+
+        this.status = Status.normal;
+        initAnimation(resources);
     }
 
-    void draw(Canvas canvas){
+    void initAnimation(Resources resources){
+        this.frame = 6;
+        if(destroyAnimSheet == null){
+            animResId = R.mipmap.firework;
+            Bitmap destroySprite = BitmapFactory.decodeResource(resources, animResId);
+            destroyAnimSheet = new ArrayList<>();
+            for(int i = 0; i < 6; i++){
+                Bitmap frameBitmap = Bitmap.createBitmap(destroySprite, i * 50, 0, 50, 50);
+                frameBitmap = Bitmap.createScaledBitmap(frameBitmap, 150, 150, false);
+                destroyAnimSheet.add(frameBitmap);
+            }
+        }
+    }
+
+    void draw(Canvas canvas, GameView gameView){
         canvas.drawBitmap(bitmap, rectX, rectY, null);
         canvas.drawRect(borderRect, paint);
+
+        int tileWidth = gameView.windowWidth / gameView.MAX_ROW;
+        int tileHeight = gameView.windowHeight / gameView.MAX_COLUMN;
+        if(frame >= 0 && frame < 6){
+            Bitmap currentBitmap = destroyAnimSheet.get(frame);
+            canvas.drawBitmap(currentBitmap,
+                    rectX + tileWidth / 2 - currentBitmap.getWidth() / 2,
+                    rectY + tileHeight / 2 - currentBitmap.getHeight() / 2,
+                    null);
+        }
     }
 
     public void selectImage(){
@@ -69,6 +127,10 @@ public class GameObject {
         this.paint.setColor(Color.BLACK);
         paintStrokeWidth = 10;
         this.paint.setStrokeWidth(paintStrokeWidth);
+    }
+
+    public void setStatus(Status status){
+        this.status = status;
     }
 
 //    public void onTouchEvent(MotionEvent event, GameView currentView){

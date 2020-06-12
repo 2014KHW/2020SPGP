@@ -56,7 +56,7 @@ public class GameView extends View {
                 GameObject currentObject = columnMap.get(y);
                 if(currentObject == null)
                     continue;
-                currentObject.draw(canvas);
+                currentObject.draw(canvas, this);
             }
         }
     }
@@ -65,11 +65,23 @@ public class GameView extends View {
         Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
             @Override
             public void doFrame(long frameTimeNanos) {
-                invalidate();
+                update(frameTimeNanos);
                 getDestroyableTiles();
+                invalidate();
                 postFrameCallback();
             }
         });
+    }
+
+    private void update(long frameTimeNanos) {
+        for(int y = 0; y < MAX_COLUMN; y++){
+            for(int x = 0; x < MAX_ROW; x++){
+                if(tileFind(x, y) == null)
+                    continue;
+
+                tileFind(x, y).update(frameTimeNanos);
+            }
+        }
     }
 
     @Override
@@ -88,25 +100,23 @@ public class GameView extends View {
                 int downIndexX = downX / (windowWidth / MAX_ROW);
                 int downIndexY = downY / (windowHeight / MAX_COLUMN);
 //                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
-                HashMap<Integer, GameObject> columnTileMap = tileObjectMap.get(downIndexX);
 
-                if(columnTileMap == null){
+                GameObject currentTile = tileFind(downIndexX, downIndexY);
+
+                if(currentTile == null){
                     if(selectedTile != null)
                         selectedTile.unselectImage();
                     selectedTile = null;
-                    break;
                 }
-                GameObject currentTile = columnTileMap.get(downIndexY);
-
-                if(selectedTile != null){
-                    ArrayList<Point> findResult = Destroyable(currentTile.getX(), currentTile.getY(),
-                                                                   selectedTile.getX(), selectedTile.getY(),
-                                                                   null, null, 0);
-                    Log.d(TAG, "findResult : " + findResult);
-                    selectedTile.unselectImage();
-                    selectedTile = null;
-                }
-                if(currentTile != null){
+                else{
+                    if(tileDestroyable.contains(new Pair<GameObject, GameObject>(currentTile, selectedTile))){
+                        currentTile.setStatus(GameObject.Status.destroyed);
+                        selectedTile.setStatus(GameObject.Status.destroyed);
+                    }
+                    else{
+                        if(selectedTile != null)
+                            selectedTile.unselectImage();
+                    }
                     currentTile.selectImage();
                     selectedTile = currentTile;
                 }
