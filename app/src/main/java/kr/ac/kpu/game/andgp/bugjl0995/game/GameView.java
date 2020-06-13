@@ -98,6 +98,10 @@ public class GameView extends View {
                     tileDestroyable.remove(p);
                     break;
                 }
+                if(p.second == currentTile){
+                    tileDestroyable.remove(p);
+                    break;
+                }
                 loopTimes++;
                 if(tileDestroyable.size() == loopTimes){
                     done = true;
@@ -116,6 +120,10 @@ public class GameView extends View {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN :
                 Log.d(TAG, "my Destroyable Tile List : " + tileDestroyable.size() / 2);
+                for(Pair<GameObject, GameObject> pair : tileDestroyable){
+                    Log.d(TAG, "src X, Y : (" + pair.first.getX() + ", " + pair.first.getY() + " )"
+                    + "\n dst X, Y : (" + pair.second.getX() + ", " + pair.second.getY() + ") ");
+                }
 
                 int downX = (int)event.getX();
                 int downY = (int)event.getY();
@@ -135,13 +143,16 @@ public class GameView extends View {
                     if(tileDestroyable.contains(new Pair<GameObject, GameObject>(currentTile, selectedTile))){
                         currentTile.setStatus(GameObject.Status.destroyed);
                         selectedTile.setStatus(GameObject.Status.destroyed);
+                        selectedTile = null;
+                        break;
                     }
                     else{
                         if(selectedTile != null)
                             selectedTile.unselectImage();
                     }
                     currentTile.selectImage();
-                    selectedTile = currentTile;
+                    if(currentTile.getStatus() == GameObject.Status.normal)
+                        selectedTile = currentTile;
                 }
             default:
                 break;
@@ -282,11 +293,15 @@ public class GameView extends View {
                 GameObject srcTile = tileFind(srcX, srcY);
                 if(srcTile == null)
                     continue;
+                if(srcTile.getStatus() != GameObject.Status.normal)
+                    continue;
 
                 for(int dstY = 0; dstY < MAX_COLUMN; dstY++){
                     for(int dstX = 0; dstX < MAX_ROW; dstX++) {
                         GameObject dstTile = tileFind(dstX, dstY);
                         if(dstTile == null)
+                            continue;
+                        if(dstTile.getStatus() != GameObject.Status.normal)
                             continue;
                         if(srcTile.getResourceId() != dstTile.getResourceId())
                             continue;
@@ -304,9 +319,5 @@ public class GameView extends View {
                 }
             }
         }
-    }
-
-    public void selectDestroy(GameObject currentObject, GameObject prevObject){
-
     }
 }

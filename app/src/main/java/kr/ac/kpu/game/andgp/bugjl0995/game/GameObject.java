@@ -47,7 +47,7 @@ public class GameObject {
         }
 
         if(this.status == Status.destroyed){
-            Log.d(TAG, "frameTime : " + (frameTimeNanos - frameNanos));
+//            Log.d(TAG, "frameTime : " + (frameTimeNanos - frameNanos));
             if(frameTimeNanos - frameNanos > 50000000){
                 if(frame == 5)
                     this.status = Status.dead;
