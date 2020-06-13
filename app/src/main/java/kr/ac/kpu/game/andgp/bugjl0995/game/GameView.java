@@ -76,10 +76,33 @@ public class GameView extends View {
     private void update(long frameTimeNanos) {
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
-                if(tileFind(x, y) == null)
+                final GameObject currentTile = tileFind(x, y);
+                if(currentTile == null)
                     continue;
+                if(currentTile.getStatus() == GameObject.Status.dead){
+                    removePair(currentTile);
+                    tileObjectMap.get(currentTile.getX()).remove(currentTile.getY());
+                    continue;
+                }
+                currentTile.update(frameTimeNanos);
+            }
+        }
+    }
 
-                tileFind(x, y).update(frameTimeNanos);
+    private void removePair(GameObject currentTile) {
+        boolean done = false;
+        while(done == false){
+            int loopTimes = 0;
+            for(Pair<GameObject, GameObject> p : tileDestroyable){
+                if(p.first == currentTile){
+                    tileDestroyable.remove(p);
+                    break;
+                }
+                loopTimes++;
+                if(tileDestroyable.size() == loopTimes){
+                    done = true;
+                    break;
+                }
             }
         }
     }

@@ -46,17 +46,22 @@ public class GameObject {
             firstUpdate = false;
         }
 
-        if(this.status != Status.destroyed)
-            return;
-
-        Log.d(TAG, "frameTime : " + (frameTimeNanos - frameNanos));
-        if(frameTimeNanos - frameNanos > 50000000){
-            frame = (frame + 1) % 6;
-            frameNanos = frameTimeNanos;
+        if(this.status == Status.destroyed){
+            Log.d(TAG, "frameTime : " + (frameTimeNanos - frameNanos));
+            if(frameTimeNanos - frameNanos > 50000000){
+                if(frame == 5)
+                    this.status = Status.dead;
+                frame = (frame + 1) % 6;
+                frameNanos = frameTimeNanos;
+            }
         }
     }
 
-    public enum Status{normal, selected, destroyed, END}
+    public Status getStatus() {
+        return this.status;
+    }
+
+    public enum Status{normal, selected, destroyed, dead, END}
     GameObject(Resources resources, int resId, int x, int y, int width, int height){
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
