@@ -108,6 +108,8 @@ public class GameView extends View {
                     break;
                 }
             }
+            if(tileDestroyable.size() == 0)
+                return;
         }
     }
 
