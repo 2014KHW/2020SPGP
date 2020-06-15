@@ -3,6 +3,8 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
 import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.Log;
 import android.util.Pair;
@@ -11,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,6 +24,13 @@ public class GameView extends View {
     public final int MAX_COLUMN = 9;
     public final int windowWidth;
     public final int windowHeight;
+
+    private int destroyCombo = 0;
+    private long frameNanos;
+    private boolean updateTime;
+    private int mouseX, mouseY;
+    private Paint comboTextPaint;
+    private boolean destroyTile = false;
 
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
@@ -37,6 +47,8 @@ public class GameView extends View {
         windowHeight = windowSize.y;
 
         selectedTile = null;
+        updateTime = true;
+        comboTextPaint = new Paint();
     }
 
     @Override
@@ -58,6 +70,13 @@ public class GameView extends View {
                     continue;
                 currentObject.draw(canvas, this);
             }
+        }
+
+        if(destroyCombo > 0 && destroyTile){
+            comboTextPaint.setColor(Color.RED);
+            comboTextPaint.setTextSize(30);
+            canvas.drawText("Combo : " + destroyCombo, mouseX, mouseY, comboTextPaint);
+            Log.d(TAG, "Combo : " + destroyCombo);
         }
     }
 
@@ -86,6 +105,22 @@ public class GameView extends View {
                 }
                 currentTile.update(frameTimeNanos);
             }
+        }
+
+        if(updateTime){
+            Log.d(TAG, "UpdateTime");
+            frameNanos = frameTimeNanos;
+            updateTime = false;
+        }
+
+        if(frameTimeNanos - frameNanos > (long)1000000000 * 5){
+            Log.d(TAG, "frameTimeNanos - FrameNanosCombo = " + (frameTimeNanos - frameNanos) + " Combo destroyed");
+            destroyCombo = 0;
+            frameNanos = frameTimeNanos;
+        }
+
+        if(frameTimeNanos - frameNanos > (long)1500000000){
+            destroyTile = false;
         }
     }
 
@@ -122,13 +157,14 @@ public class GameView extends View {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN :
                 Log.d(TAG, "my Destroyable Tile List : " + tileDestroyable.size() / 2);
-                for(Pair<GameObject, GameObject> pair : tileDestroyable){
-                    Log.d(TAG, "src X, Y : (" + pair.first.getX() + ", " + pair.first.getY() + " )"
-                    + "\n dst X, Y : (" + pair.second.getX() + ", " + pair.second.getY() + ") ");
-                }
+//                for(Pair<GameObject, GameObject> pair : tileDestroyable){
+//                    Log.d(TAG, "src X, Y : (" + pair.first.getX() + ", " + pair.first.getY() + " )"
+//                    + "\n dst X, Y : (" + pair.second.getX() + ", " + pair.second.getY() + ") ");
+//                }
 
                 int downX = (int)event.getX();
                 int downY = (int)event.getY();
+
 //                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
                 int downIndexX = downX / (windowWidth / MAX_ROW);
                 int downIndexY = downY / (windowHeight / MAX_COLUMN);
@@ -146,6 +182,10 @@ public class GameView extends View {
                         currentTile.setStatus(GameObject.Status.destroyed);
                         selectedTile.setStatus(GameObject.Status.destroyed);
                         selectedTile = null;
+                        mouseX = downX; mouseY = downY;
+                        destroyCombo++;
+                        destroyTile = true;
+                        updateTime = true;
                         break;
                     }
                     else{
