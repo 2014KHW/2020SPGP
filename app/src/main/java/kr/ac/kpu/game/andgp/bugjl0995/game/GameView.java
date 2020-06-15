@@ -178,6 +178,27 @@ public class GameView extends View {
                     selectedTile = null;
                 }
                 else{
+                    boolean forceDestroy = false;
+                    if(destroyCombo > 0 && destroyCombo % 5 == 0){
+                        Log.d(TAG, " " + destroyCombo % 5);
+                        for(int y = 0; y < MAX_COLUMN; y++){
+                            for(int x = 0; x < MAX_ROW; x++){
+                                GameObject sameWithCurrentTile = tileFind(y, x);
+                                if(sameWithCurrentTile == null)continue;
+                                if(sameWithCurrentTile.getResourceId() != currentTile.getResourceId())continue;
+                                if(sameWithCurrentTile.getX() == currentTile.getX() && sameWithCurrentTile.getY() == currentTile.getY())continue;
+                                currentTile.setStatus(GameObject.Status.destroyed);
+                                sameWithCurrentTile.setStatus(GameObject.Status.destroyed);
+                                destroyCombo++;
+                                updateTime = true;
+                                forceDestroy = true;
+                                break;
+                            }
+                        }
+                        if(forceDestroy)
+                            break;
+                    }
+
                     if(tileDestroyable.contains(new Pair<GameObject, GameObject>(currentTile, selectedTile))){
                         currentTile.setStatus(GameObject.Status.destroyed);
                         selectedTile.setStatus(GameObject.Status.destroyed);

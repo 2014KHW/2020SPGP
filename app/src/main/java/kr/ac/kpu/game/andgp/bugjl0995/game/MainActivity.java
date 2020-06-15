@@ -39,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
         gameView.addTile(new GameObject(resources, R.mipmap.deer, 0, 2, tileWidth, tileHeight));
         gameView.addTile(new GameObject(resources, R.mipmap.deer, 0, 1, tileWidth, tileHeight));
 
+        gameView.addTile(new GameObject(resources, R.mipmap.duck, 4, 4, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.duck, 5, 7, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.lion, 7, 6, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.lion, 6, 6, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 5, 6, tileWidth, tileHeight));
+        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 5, 1, tileWidth, tileHeight));
+
         gameView.getDestroyableTiles();
 //        GameObject go = new GameObject(getResources(), R.mipmap.crocodile, 0, 0);
 //        go.draw(canvas);
