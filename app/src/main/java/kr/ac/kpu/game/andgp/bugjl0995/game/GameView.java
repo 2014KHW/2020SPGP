@@ -2,10 +2,13 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
 
 import android.app.Service;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Choreographer;
@@ -13,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -26,7 +28,7 @@ public class GameView extends View {
     public final int windowHeight;
 
     private int destroyCombo = 0;
-    private long frameNanos;
+    private long comboTimeNanos;
     private boolean updateTime;
     private int mouseX, mouseY;
     private Paint comboTextPaint;
@@ -35,7 +37,8 @@ public class GameView extends View {
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
     static private GameObject selectedTile;
-    private long timeLimit = (long)1000000000 * 100; // 제한시간
+    private long timeLimit; // 제한시간
+    private long currentTimeNanos;
 
     public GameView(Context context) {
         super(context);
@@ -50,6 +53,7 @@ public class GameView extends View {
         selectedTile = null;
         updateTime = true;
         comboTextPaint = new Paint();
+        timeLimit = (long)1000000000 * 100;
     }
 
     @Override
@@ -79,6 +83,22 @@ public class GameView extends View {
             canvas.drawText("Combo : " + destroyCombo, mouseX, mouseY, comboTextPaint);
             Log.d(TAG, "Combo : " + destroyCombo);
         }
+
+        if(timeLimit >= 0){
+            Bitmap timeLimitBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.cat1);
+
+            Rect timeSrcRect = new Rect(0, 0,
+                    timeLimitBitmap.getWidth(),
+                    timeLimitBitmap.getHeight());
+
+            int result = (int) (windowWidth * ((double)timeLimit / ((double)1000000000 * 100)));
+
+            Rect timeDstRect = new Rect(0, 0,
+                    result,
+                    timeLimitBitmap.getHeight());
+
+            canvas.drawBitmap(timeLimitBitmap, timeSrcRect, timeDstRect, null);
+        }
     }
 
     private void postFrameCallback() {
@@ -94,8 +114,6 @@ public class GameView extends View {
     }
 
     private void update(long frameTimeNanos) {
-
-        timeLimit -= frameTimeNanos;
 
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
@@ -113,17 +131,23 @@ public class GameView extends View {
 
         if(updateTime){
             Log.d(TAG, "UpdateTime");
-            frameNanos = frameTimeNanos;
+            comboTimeNanos = frameTimeNanos;
+            currentTimeNanos = frameTimeNanos;
             updateTime = false;
         }
 
-        if(frameTimeNanos - frameNanos > (long)1000000000 * 5){
-            Log.d(TAG, "frameTimeNanos - FrameNanosCombo = " + (frameTimeNanos - frameNanos) + " Combo destroyed");
+        timeLimit -= frameTimeNanos - currentTimeNanos;
+        if(timeLimit < 0)
+            Log.d(TAG, "GameOver!!");
+        currentTimeNanos = frameTimeNanos;
+
+        if(frameTimeNanos - comboTimeNanos > (long)1000000000 * 5){
+            Log.d(TAG, "frameTimeNanos - FrameNanosCombo = " + (frameTimeNanos - comboTimeNanos) + " Combo destroyed");
             destroyCombo = 0;
-            frameNanos = frameTimeNanos;
+            comboTimeNanos = frameTimeNanos;
         }
 
-        if(frameTimeNanos - frameNanos > (long)1500000000){
+        if(frameTimeNanos - comboTimeNanos > (long)1500000000){
             destroyTile = false;
         }
     }
