@@ -35,6 +35,7 @@ public class GameView extends View {
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
     static private GameObject selectedTile;
+    private long timeLimit = (long)1000000000 * 100; // 제한시간
 
     public GameView(Context context) {
         super(context);
@@ -93,6 +94,9 @@ public class GameView extends View {
     }
 
     private void update(long frameTimeNanos) {
+
+        timeLimit -= frameTimeNanos;
+
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
                 final GameObject currentTile = tileFind(x, y);
