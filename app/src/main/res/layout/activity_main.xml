@@ -11,7 +11,8 @@
         android:id="@+id/topBGImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="@drawable/background_pattern"/>
 
     <kr.ac.kpu.game.andgp.bugjl0995.game.GameView
         android:id="@+id/gameScreenView"
@@ -23,7 +24,8 @@
         android:id="@+id/bottomBGImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="@drawable/background_pattern"/>
 
 
 

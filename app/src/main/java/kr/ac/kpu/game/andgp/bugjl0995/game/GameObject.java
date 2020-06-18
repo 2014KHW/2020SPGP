@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class GameObject {
     private static final String TAG = GameObject.class.getSimpleName();
-    public static final int PADDING_FOR_SINK = 20;
+    public static final int PADDING_FOR_SINK = 15;
 
     private Bitmap bitmap;
     private final Rect borderRect;

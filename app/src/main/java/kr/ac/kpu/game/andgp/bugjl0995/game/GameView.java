@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -24,7 +26,7 @@ import java.util.HashMap;
 
 public class GameView extends View {
     private static final String TAG = GameView.class.getSimpleName();
-//    static private ArrayList<GameObject> tiles = new ArrayList<>();
+    //    static private ArrayList<GameObject> tiles = new ArrayList<>();
     public final int MAX_ROW = 10;
     public final int MAX_COLUMN = 9;
     public int windowWidth;
@@ -101,17 +103,21 @@ public class GameView extends View {
         }
 
         if(timeLimit >= 0){
-            Bitmap timeLimitBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.cat1);
+//            Bitmap timeLimitBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.timelimit_bar);
+            BitmapDrawable bd = (BitmapDrawable)getResources().getDrawable(R.drawable.timelimit_bar);
+            Bitmap timeLimitBitmap = bd.getBitmap();
+
+            int resultsrcRect = (int) (timeLimitBitmap.getWidth() * ((double)timeLimit / ((double)1000000000 * 100)));
+            int resultdstRect = (int) (windowWidth * ((double)timeLimit / ((double)1000000000 * 100)));
 
             Rect timeSrcRect = new Rect(0, 0,
-                    timeLimitBitmap.getWidth(),
+                    resultsrcRect,
                     timeLimitBitmap.getHeight());
-
-            int result = (int) (windowWidth * ((double)timeLimit / ((double)1000000000 * 100)));
 
             Rect timeDstRect = new Rect(0, 0,
-                    result,
-                    timeLimitBitmap.getHeight());
+                    resultdstRect,
+                    20);
+//            Log.d(TAG, "bitmap, src, dst : " + timeLimitBitmap + ", " + timeSrcRect + ", " + timeDstRect);
 
             canvas.drawBitmap(timeLimitBitmap, timeSrcRect, timeDstRect, null);
         }
