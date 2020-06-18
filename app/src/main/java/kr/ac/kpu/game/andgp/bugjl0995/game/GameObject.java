@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 public class GameObject {
     private static final String TAG = GameObject.class.getSimpleName();
+    public static final int PADDING_FOR_SINK = 20;
 
     private Bitmap bitmap;
     private final Rect borderRect;
@@ -86,9 +87,9 @@ public class GameObject {
 
         this.rectX = x * width;
         this.rectY = y * height;
-        this.borderRect = new Rect(rectX + 5, rectY + 5,
+        this.borderRect = new Rect(rectX + 5, rectY + 5 - PADDING_FOR_SINK,
                 rectX + borderBitmap.getWidth() - 5,
-                rectY + borderBitmap.getHeight() - 5);
+                rectY + borderBitmap.getHeight() - 5 - PADDING_FOR_SINK);
 
         this.status = Status.normal;
         initAnimation(resources);
@@ -109,7 +110,7 @@ public class GameObject {
     }
 
     void draw(Canvas canvas, GameView gameView){
-        canvas.drawBitmap(bitmap, rectX, rectY, null);
+        canvas.drawBitmap(bitmap, rectX, rectY - PADDING_FOR_SINK, null);
         canvas.drawRect(borderRect, paint);
 
         int tileWidth = gameView.windowWidth / gameView.MAX_ROW;

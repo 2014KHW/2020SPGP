@@ -9,12 +9,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +27,8 @@ public class GameView extends View {
 //    static private ArrayList<GameObject> tiles = new ArrayList<>();
     public final int MAX_ROW = 10;
     public final int MAX_COLUMN = 9;
-    public final int windowWidth;
-    public final int windowHeight;
+    public int windowWidth;
+    public int windowHeight;
 
     private int destroyCombo = 0;
     private long comboTimeNanos;
@@ -44,16 +47,29 @@ public class GameView extends View {
         super(context);
         postFrameCallback();
 
+        initResources();
+    }
+
+    private void initResources() {
         WindowManager wm = (WindowManager) getContext().getSystemService(Service.WINDOW_SERVICE);
         Point windowSize = new Point();
         wm.getDefaultDisplay().getSize(windowSize);
+//        GameView windowSize = findViewById(R.id.gameScreenView);
         windowWidth = windowSize.x;
-        windowHeight = windowSize.y;
+        windowHeight = windowSize.y * 5 / 6;
+        Log.d(TAG, "windowWidth , windowHeight : " + windowWidth + ", " + windowHeight);
 
         selectedTile = null;
         updateTime = true;
         comboTextPaint = new Paint();
         timeLimit = (long)1000000000 * 100;
+
+        postFrameCallback();
+    }
+
+    public GameView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        initResources();
     }
 
     @Override

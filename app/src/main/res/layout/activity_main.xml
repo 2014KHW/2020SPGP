@@ -7,4 +7,24 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/topBGImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <kr.ac.kpu.game.andgp.bugjl0995.game.GameView
+        android:id="@+id/gameScreenView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10"/>
+
+    <ImageView
+        android:id="@+id/bottomBGImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+
+
 </LinearLayout>

@@ -23,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        GameView gameView = new GameView(this );
-        setContentView(gameView);
+        setContentView(R.layout.activity_main);
+        GameView gameView = findViewById(R.id.gameScreenView);
 
         resources = getResources();
 
