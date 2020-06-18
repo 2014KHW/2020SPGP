@@ -18,6 +18,7 @@ import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -29,15 +30,16 @@ public class GameView extends View {
     //    static private ArrayList<GameObject> tiles = new ArrayList<>();
     public final int MAX_ROW = 10;
     public final int MAX_COLUMN = 9;
+    public TextView hInterface = null;
     public int windowWidth;
     public int windowHeight;
 
-    private int destroyCombo = 0;
+    public static int destroyCombo = 0;
     private long comboTimeNanos;
     private boolean updateTime;
     private int mouseX, mouseY;
     private Paint comboTextPaint;
-    private boolean destroyTile = false;
+    public static boolean destroyTile = false;
 
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
@@ -45,7 +47,9 @@ public class GameView extends View {
     private long timeLimit; // 제한시간
     private long currentTimeNanos;
 
-    public GameView(Context context) {
+    private int score;
+
+    public GameView(Context context, TextView ltv) {
         super(context);
         postFrameCallback();
 
@@ -59,29 +63,29 @@ public class GameView extends View {
 //        GameView windowSize = findViewById(R.id.gameScreenView);
         windowWidth = windowSize.x;
         windowHeight = windowSize.y * 5 / 6;
-        Log.d(TAG, "windowWidth , windowHeight : " + windowWidth + ", " + windowHeight);
+//        Log.d(TAG, "windowWidth , windowHeight : " + windowWidth + ", " + windowHeight);
 
         selectedTile = null;
         updateTime = true;
         comboTextPaint = new Paint();
         timeLimit = (long)1000000000 * 100;
 
+        score = 0;
+
         postFrameCallback();
     }
 
     public GameView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+
         initResources();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if (tileObjectMap.size() <= 0)
-            return;
 
-//        for(GameObject o : tiles){
-//            o.draw(canvas);
-//        }
+    @Override
+        protected void onDraw(Canvas canvas) {
+            if (tileObjectMap.size() <= 0)
+                return;
 
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
@@ -120,6 +124,12 @@ public class GameView extends View {
 //            Log.d(TAG, "bitmap, src, dst : " + timeLimitBitmap + ", " + timeSrcRect + ", " + timeDstRect);
 
             canvas.drawBitmap(timeLimitBitmap, timeSrcRect, timeDstRect, null);
+        }
+
+        if(hInterface != null){
+            hInterface.setTextColor(Color.YELLOW);
+            hInterface.setText("Score : " + this.score);
+//            Log.d(TAG, "Score : " + this.score);
         }
     }
 
@@ -230,7 +240,7 @@ public class GameView extends View {
                 else{
                     boolean forceDestroy = false;
                     if(destroyCombo > 0 && destroyCombo % 5 == 0){
-                        Log.d(TAG, " " + destroyCombo % 5);
+//                        Log.d(TAG, " " + destroyCombo % 5);
                         for(int y = 0; y < MAX_COLUMN; y++){
                             for(int x = 0; x < MAX_ROW; x++){
                                 GameObject sameWithCurrentTile = tileFind(y, x);
@@ -240,6 +250,7 @@ public class GameView extends View {
                                 currentTile.setStatus(GameObject.Status.destroyed);
                                 sameWithCurrentTile.setStatus(GameObject.Status.destroyed);
                                 destroyCombo++;
+                                this.score += 100 * destroyCombo;
                                 updateTime = true;
                                 forceDestroy = true;
                                 break;
@@ -255,6 +266,7 @@ public class GameView extends View {
                         selectedTile = null;
                         mouseX = downX; mouseY = downY;
                         destroyCombo++;
+                        this.score += 100 * destroyCombo;
                         destroyTile = true;
                         updateTime = true;
                         break;
