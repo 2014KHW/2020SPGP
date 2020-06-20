@@ -24,7 +24,15 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Comparator;
+
+class Descending implements Comparator<Integer>{
+    public int compare(Integer a, Integer b){
+        return b.compareTo(a);
+    }
+}
 
 public class GameView extends View {
     private static final String TAG = GameView.class.getSimpleName();
@@ -50,6 +58,7 @@ public class GameView extends View {
     private long currentTimeNanos;
 
     private int score;
+    private ArrayList<Integer> highscores = new ArrayList<>();
 
     private GameState gameState;
     static private ArrayList<Bitmap> gameStateBitmap = new ArrayList<>();
@@ -308,7 +317,18 @@ public class GameView extends View {
 
     private void onTouchGameclear(MotionEvent event) {
         gameState = GameState.menu;
+        addHighscore(score);
+    }
 
+    private void addHighscore(int score) {
+        if(highscores.size() < 10){
+            highscores.add(score);
+        }
+        else{
+            highscores.remove(9);
+            highscores.add(score);
+        }
+        Collections.sort(highscores, new Descending());
     }
 
     private void onTouchGameover(MotionEvent event) {
