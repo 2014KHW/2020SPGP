@@ -29,9 +29,6 @@ public class GameObject {
     private int rectY;
     private int resId;
 
-    private int tileWidth;
-    private int tileHeight;
-
     private int frame = -1;
     static private ArrayList<Bitmap> destroyAnimSheet = null;
     static private int animResId;

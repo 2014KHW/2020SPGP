@@ -18,6 +18,7 @@ import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -40,6 +41,7 @@ public class GameView extends View {
     private int mouseX, mouseY;
     private Paint comboTextPaint;
     public static boolean destroyTile = false;
+    private boolean allDestroyedTiles = false;
 
     static private HashMap<Integer, HashMap<Integer, GameObject>>  tileObjectMap = new HashMap<>();
     static private ArrayList<Pair<GameObject, GameObject>> tileDestroyable = new ArrayList<>();
@@ -48,6 +50,11 @@ public class GameView extends View {
     private long currentTimeNanos;
 
     private int score;
+
+    private GameState gameState;
+    static private ArrayList<Bitmap> gameStateBitmap = new ArrayList<>();
+
+    enum GameState{menu, gaming, gameover, gameclear}
 
     public GameView(Context context, TextView ltv) {
         super(context);
@@ -71,6 +78,12 @@ public class GameView extends View {
         timeLimit = (long)1000000000 * 100;
 
         score = 0;
+        gameState = GameState.menu;
+        if(gameStateBitmap.size() == 0){
+            gameStateBitmap.add(BitmapFactory.decodeResource(getResources(), R.mipmap.start_message));
+            gameStateBitmap.add(BitmapFactory.decodeResource(getResources(), R.mipmap.gameover_message));
+            gameStateBitmap.add(BitmapFactory.decodeResource(getResources(), R.mipmap.gameclear_message));
+        }
 
         postFrameCallback();
     }
@@ -83,9 +96,50 @@ public class GameView extends View {
 
 
     @Override
-        protected void onDraw(Canvas canvas) {
-            if (tileObjectMap.size() <= 0)
-                return;
+    protected void onDraw(Canvas canvas) {
+        switch (gameState){
+            case menu:
+                onDrawMenu(canvas);
+                break;
+            case gaming:
+                onDrawGaming(canvas);
+                break;
+            case gameclear:
+                onDrawGameclear(canvas);
+                break;
+            case gameover:
+                onDrawGameover(canvas);
+                break;
+        }
+    }
+
+    private void onDrawGameclear(Canvas canvas) {
+        Bitmap gameclearBitmap = gameStateBitmap.get(2);
+        Rect srcRect = new Rect(0, 0,
+                gameclearBitmap.getWidth(), gameclearBitmap.getHeight());
+        Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
+        canvas.drawBitmap(gameclearBitmap, srcRect, dstRect, null);
+    }
+
+    private void onDrawGameover(Canvas canvas) {
+        Bitmap gameoverBitamp = gameStateBitmap.get(1);
+        Rect srcRect = new Rect(0, 0,
+                gameoverBitamp.getWidth(), gameoverBitamp.getHeight());
+        Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
+        canvas.drawBitmap(gameoverBitamp, srcRect, dstRect, null);
+    }
+
+    private void onDrawMenu(Canvas canvas) {
+        Bitmap startBitamp = gameStateBitmap.get(0);
+        Rect srcRect = new Rect(0, 0,
+                startBitamp.getWidth(), startBitamp.getHeight());
+        Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
+        canvas.drawBitmap(startBitamp, srcRect, dstRect, null);
+    }
+
+    private void onDrawGaming(Canvas canvas) {
+        if (tileObjectMap.size() <= 0)
+            return;
 
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
@@ -147,11 +201,22 @@ public class GameView extends View {
 
     private void update(long frameTimeNanos) {
 
+        if(gameState == GameState.gaming){
+            updateGaming(frameTimeNanos);
+        }
+        else{
+            timeLimit = (long)1000000000 * 100;
+        }
+    }
+
+    private void updateGaming(long frameTimeNanos) {
+        allDestroyedTiles = true;
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
                 final GameObject currentTile = tileFind(x, y);
                 if(currentTile == null)
                     continue;
+                allDestroyedTiles = false;
                 if(currentTile.getStatus() == GameObject.Status.dead){
                     removePair(currentTile);
                     tileObjectMap.get(currentTile.getX()).remove(currentTile.getY());
@@ -169,8 +234,11 @@ public class GameView extends View {
         }
 
         timeLimit -= frameTimeNanos - currentTimeNanos;
-        if(timeLimit < 0)
-            Log.d(TAG, "GameOver!!");
+        if(timeLimit < 0){
+//            Log.d(TAG, "GameOver!!");
+            gameState = GameState.gameover;
+            return;
+        }
         currentTimeNanos = frameTimeNanos;
 
         if(frameTimeNanos - comboTimeNanos > (long)1000000000 * 5){
@@ -181,6 +249,10 @@ public class GameView extends View {
 
         if(frameTimeNanos - comboTimeNanos > (long)1500000000){
             destroyTile = false;
+        }
+
+        if(tileDestroyable.size() == 0 && allDestroyedTiles){
+            gameState = GameState.gameclear;
         }
     }
 
@@ -210,80 +282,105 @@ public class GameView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        for(GameObject o : tiles){
-//            o.onTouchEvent(event, this);
-//        }
-
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN :
-                Log.d(TAG, "my Destroyable Tile List : " + tileDestroyable.size() / 2);
-//                for(Pair<GameObject, GameObject> pair : tileDestroyable){
-//                    Log.d(TAG, "src X, Y : (" + pair.first.getX() + ", " + pair.first.getY() + " )"
-//                    + "\n dst X, Y : (" + pair.second.getX() + ", " + pair.second.getY() + ") ");
-//                }
-
-                int downX = (int)event.getX();
-                int downY = (int)event.getY();
-
-//                Log.d(TAG, "MouseButtonDown! : (" + downX + ", " + downY + ") ");
-                int downIndexX = downX / (windowWidth / MAX_ROW);
-                int downIndexY = downY / (windowHeight / MAX_COLUMN);
-//                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
-
-                GameObject currentTile = tileFind(downIndexX, downIndexY);
-
-                if(currentTile == null){
-                    if(selectedTile != null)
-                        selectedTile.unselectImage();
-                    selectedTile = null;
-                }
-                else{
-                    boolean forceDestroy = false;
-                    if(destroyCombo > 0 && destroyCombo % 5 == 0){
-//                        Log.d(TAG, " " + destroyCombo % 5);
-                        for(int y = 0; y < MAX_COLUMN; y++){
-                            for(int x = 0; x < MAX_ROW; x++){
-                                GameObject sameWithCurrentTile = tileFind(y, x);
-                                if(sameWithCurrentTile == null)continue;
-                                if(sameWithCurrentTile.getResourceId() != currentTile.getResourceId())continue;
-                                if(sameWithCurrentTile.getX() == currentTile.getX() && sameWithCurrentTile.getY() == currentTile.getY())continue;
-                                currentTile.setStatus(GameObject.Status.destroyed);
-                                sameWithCurrentTile.setStatus(GameObject.Status.destroyed);
-                                destroyCombo++;
-                                this.score += 100 * destroyCombo;
-                                updateTime = true;
-                                forceDestroy = true;
-                                break;
-                            }
-                        }
-                        if(forceDestroy)
-                            break;
-                    }
-
-                    if(tileDestroyable.contains(new Pair<GameObject, GameObject>(currentTile, selectedTile))){
-                        currentTile.setStatus(GameObject.Status.destroyed);
-                        selectedTile.setStatus(GameObject.Status.destroyed);
-                        selectedTile = null;
-                        mouseX = downX; mouseY = downY;
-                        destroyCombo++;
-                        this.score += 100 * destroyCombo;
-                        destroyTile = true;
-                        updateTime = true;
+                switch (gameState){
+                    case menu:
+                        onTouchMenu(event);
                         break;
-                    }
-                    else{
-                        if(selectedTile != null)
-                            selectedTile.unselectImage();
-                    }
-                    currentTile.selectImage();
-                    if(currentTile.getStatus() == GameObject.Status.normal)
-                        selectedTile = currentTile;
+                    case gaming:
+                        onTouchGaming(event);
+                        break;
+                    case gameclear:
+                        onTouchGameclear(event);
+                        break;
+                    case gameover:
+                        onTouchGameover(event);
+                        break;
                 }
+                break;
             default:
                 break;
         }
 
         return false;
+    }
+
+    private void onTouchGameclear(MotionEvent event) {
+        gameState = GameState.menu;
+
+    }
+
+    private void onTouchGameover(MotionEvent event) {
+        gameState = GameState.menu;
+    }
+
+    private void onTouchMenu(MotionEvent event) {
+        gameState = GameState.gaming;
+    }
+
+    private void onTouchGaming(MotionEvent event) {
+        Log.d(TAG, "my Destroyable Tile List : " + tileDestroyable.size() / 2);
+
+        int downX = (int)event.getX();
+        int downY = (int)event.getY();
+        int downIndexX = downX / (windowWidth / MAX_ROW);
+        int downIndexY = downY / (windowHeight / MAX_COLUMN);
+//                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
+
+        GameObject currentTile = tileFind(downIndexX, downIndexY);
+
+        if(currentTile == null){
+            if(selectedTile != null){
+                selectedTile.unselectImage();
+                timeLimit -= (long)1000000000 * 5;
+            }
+            selectedTile = null;
+        }
+        else{
+            boolean forceDestroy = false;
+            if(destroyCombo > 0 && destroyCombo % 5 == 0){
+//                        Log.d(TAG, " " + destroyCombo % 5);
+                for(int y = 0; y < MAX_COLUMN; y++){
+                    for(int x = 0; x < MAX_ROW; x++){
+                        GameObject sameWithCurrentTile = tileFind(y, x);
+                        if(sameWithCurrentTile == null)continue;
+                        if(sameWithCurrentTile.getResourceId() != currentTile.getResourceId())continue;
+                        if(sameWithCurrentTile.getX() == currentTile.getX() && sameWithCurrentTile.getY() == currentTile.getY())continue;
+                        currentTile.setStatus(GameObject.Status.destroyed);
+                        sameWithCurrentTile.setStatus(GameObject.Status.destroyed);
+                        destroyCombo++;
+                        this.score += 100 * destroyCombo;
+                        updateTime = true;
+                        forceDestroy = true;
+                        break;
+                    }
+                }
+                if(forceDestroy)
+                    return;
+            }
+
+            if(tileDestroyable.contains(new Pair<GameObject, GameObject>(currentTile, selectedTile))){
+                currentTile.setStatus(GameObject.Status.destroyed);
+                selectedTile.setStatus(GameObject.Status.destroyed);
+                selectedTile = null;
+                mouseX = downX; mouseY = downY;
+                destroyCombo++;
+                this.score += 100 * destroyCombo;
+                destroyTile = true;
+                updateTime = true;
+                return;
+            }
+            else{
+                if(selectedTile != null){
+                    selectedTile.unselectImage();
+                    timeLimit -= (long)1000000000 * 5;
+                }
+            }
+            currentTile.selectImage();
+            if(currentTile.getStatus() == GameObject.Status.normal)
+                selectedTile = currentTile;
+        }
     }
 
     public void addTile(GameObject gameObject){

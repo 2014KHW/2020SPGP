@@ -5,6 +5,8 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
         import android.content.res.Resources;
         import android.os.Bundle;
         import android.view.View;
+        import android.widget.Button;
+        import android.widget.LinearLayout;
         import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +44,5 @@ public class MainActivity extends AppCompatActivity {
         gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 5, 1, tileWidth, tileHeight));
 
         gameView.getDestroyableTiles();
-//        GameObject go = new GameObject(getResources(), R.mipmap.crocodile, 0, 0);
-//        go.draw(canvas);
     }
 }
