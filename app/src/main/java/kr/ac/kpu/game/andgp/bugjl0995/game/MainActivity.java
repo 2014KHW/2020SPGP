@@ -6,6 +6,7 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
         import android.os.Bundle;
         import android.view.View;
         import android.widget.Button;
+        import android.widget.ImageButton;
         import android.widget.LinearLayout;
         import android.widget.TextView;
 
@@ -21,6 +22,12 @@ public class MainActivity extends AppCompatActivity {
         GameView gameView = findViewById(R.id.gameScreenView);
         TextView hInterface = findViewById(R.id.highInterface);
         gameView.hInterface = hInterface;
+        ImageButton itemFindglass = findViewById(R.id.lowInterface).findViewById(R.id.findglass);
+        gameView.addItem(itemFindglass);
+        ImageButton itemBomb = findViewById(R.id.lowInterface).findViewById(R.id.bomb);
+        gameView.addItem(itemBomb);
+        ImageButton itemShuffle = findViewById(R.id.lowInterface).findViewById(R.id.shuffle);
+        gameView.addItem(itemShuffle);
 //        findViewById(R.id.lowInterface);
 
         resources = getResources();

@@ -28,6 +28,7 @@
         android:orientation="horizontal"
         android:background="@drawable/background_pattern">
         <ImageButton
+            android:id="@+id/findglass"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -37,6 +38,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"/>
         <ImageButton
+            android:id="@+id/bomb"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -46,6 +48,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"/>
         <ImageButton
+            android:id="@+id/shuffle"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"

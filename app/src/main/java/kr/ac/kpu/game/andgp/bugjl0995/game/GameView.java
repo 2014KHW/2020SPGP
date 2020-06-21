@@ -11,6 +11,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -19,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Comparator;
+import java.util.Random;
 
 class Descending implements Comparator<Integer>{
     public int compare(Integer a, Integer b){
@@ -63,14 +66,9 @@ public class GameView extends View {
     private GameState gameState;
     static private ArrayList<Bitmap> gameStateBitmap = new ArrayList<>();
 
+    private ArrayList<ImageButton> itemList = new ArrayList<>();
+
     enum GameState{menu, gaming, gameover, gameclear}
-
-    public GameView(Context context, TextView ltv) {
-        super(context);
-        postFrameCallback();
-
-        initResources();
-    }
 
     private void initResources() {
         WindowManager wm = (WindowManager) getContext().getSystemService(Service.WINDOW_SERVICE);
@@ -161,6 +159,9 @@ public class GameView extends View {
                 currentObject.draw(canvas, this);
             }
         }
+
+        if(selectedTile != null)
+            selectedTile.draw(canvas, this);
 
         if(destroyCombo > 0 && destroyTile){
             comboTextPaint.setColor(Color.RED);
@@ -299,6 +300,9 @@ public class GameView extends View {
                         break;
                     case gaming:
                         onTouchGaming(event);
+                        for(ImageButton ib : itemList){
+                            ib.onTouchEvent(event);
+                        }
                         break;
                     case gameclear:
                         onTouchGameclear(event);
@@ -398,6 +402,9 @@ public class GameView extends View {
                 }
             }
             currentTile.selectImage();
+            if(currentTile.getStatus() != GameObject.Status.dead &&
+               currentTile.getStatus() != GameObject.Status.destroyed)
+                currentTile.setStatus(GameObject.Status.normal);
             if(currentTile.getStatus() == GameObject.Status.normal)
                 selectedTile = currentTile;
         }
@@ -415,6 +422,106 @@ public class GameView extends View {
         GameObject oldObject = columnTileMap.get(gameObject.getY());
         if(oldObject == null)
             columnTileMap.put(gameObject.getY(), gameObject);
+    }
+
+    public void addItem(final ImageButton item){
+
+        itemList.add(item);
+
+        item.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                useItem(itemList.indexOf(item));
+            }
+        });
+    }
+
+    private void useItem(int index) {
+        switch (index){
+            case 0:{
+                GameObject randomTile = null;
+                while(randomTile == null){
+                    Random randNum = new Random(System.currentTimeMillis());
+                    int x = randNum.nextInt(MAX_COLUMN);
+                    int y = randNum.nextInt(MAX_ROW);
+                    randomTile = tileFind(x, y);
+                }
+                ArrayList<GameObject> sameTiles = findSamePictureTile(randomTile);
+                Random randNum = new Random(System.currentTimeMillis());
+                int one = randNum.nextInt(sameTiles.size());
+                int two = one;
+                while(one == two){
+                    two = randNum.nextInt(sameTiles.size());
+                }
+                sameTiles.get(one).setStatus(GameObject.Status.found);
+                sameTiles.get(one).unselectImage();
+                sameTiles.get(two).setStatus(GameObject.Status.found);
+                sameTiles.get(one).unselectImage();
+                if(selectedTile == sameTiles.get(one) || selectedTile == sameTiles.get(two))
+                    selectedTile = null;
+                break;}
+            case 1:{
+                GameObject randomTile = null;
+                while(randomTile == null){
+                    Random randNum = new Random(System.currentTimeMillis());
+                    int x = randNum.nextInt(MAX_COLUMN);
+                    int y = randNum.nextInt(MAX_ROW);
+                    randomTile = tileFind(x, y);
+                }
+                ArrayList<GameObject> sameTiles = findSamePictureTile(randomTile);
+                Random randNum = new Random(System.currentTimeMillis());
+                int one = randNum.nextInt(sameTiles.size());
+                int two = one;
+                while(one == two){
+                    two = randNum.nextInt(sameTiles.size());
+                }
+                sameTiles.get(one).setStatus(GameObject.Status.destroyed);
+                sameTiles.get(two).setStatus(GameObject.Status.destroyed);
+                break;}
+            case 2:{
+                ArrayList<GameObject> allTiles = getAllTiles();
+                int i = 0;
+                Random randNum = new Random(System.currentTimeMillis());
+                while( i++ <= 100 ){
+                    int srcIndex = randNum.nextInt(allTiles.size());
+                    int dstIndex = randNum.nextInt(allTiles.size());
+                    int srcRes = allTiles.get(srcIndex).getResId();
+                    int dstRes = allTiles.get(dstIndex).getResId();
+                    allTiles.get(srcIndex).setResId(dstRes);
+                    allTiles.get(dstIndex).setResId(srcRes);
+                }
+                tileDestroyable = new ArrayList<>();
+                getDestroyableTiles();
+                break;}
+        }
+    }
+
+    private ArrayList<GameObject> getAllTiles() {
+        ArrayList<GameObject> allTiles = new ArrayList<>();
+        for(int y = 0; y < MAX_COLUMN; y++){
+            for(int x = 0; x < MAX_ROW; x++){
+                GameObject currentTile = tileFind(x, y);
+                if(currentTile != null)
+                    allTiles.add(currentTile);
+            }
+        }
+        return allTiles;
+    }
+
+    private ArrayList<GameObject> findSamePictureTile(GameObject randomTile) {
+        ArrayList<GameObject> samePictures  = new ArrayList<>();
+        samePictures.add(randomTile);
+        for(int y = 0; y < MAX_COLUMN; y++){
+            for(int x = 0; x < MAX_COLUMN; x++){
+                GameObject currentTile = tileFind(x, y);
+                if(currentTile == null)continue;
+                if(currentTile.getX() == randomTile.getX() &&
+                currentTile.getY() == randomTile.getY())continue;
+                if(currentTile.getResourceId() == randomTile.getResourceId())
+                    samePictures.add(currentTile);
+            }
+        }
+        return samePictures;
     }
 
     enum Direction {UP, LEFT, DOWN, RIGHT, END};
@@ -535,7 +642,8 @@ public class GameView extends View {
                 GameObject srcTile = tileFind(srcX, srcY);
                 if(srcTile == null)
                     continue;
-                if(srcTile.getStatus() != GameObject.Status.normal)
+                if(srcTile.getStatus() == GameObject.Status.destroyed
+                        || srcTile.getStatus() == GameObject.Status.dead)
                     continue;
 
                 for(int dstY = 0; dstY < MAX_COLUMN; dstY++){

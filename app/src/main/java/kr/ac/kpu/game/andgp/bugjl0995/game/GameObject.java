@@ -7,16 +7,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.Log;
-import android.view.MotionEvent;
-
-import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
 public class GameObject {
     private static final String TAG = GameObject.class.getSimpleName();
     public static final int PADDING_FOR_SINK = 15;
+    private final Resources resources;
 
     private Bitmap bitmap;
     private final Rect borderRect;
@@ -25,9 +22,12 @@ public class GameObject {
 
     private int x;
     private int y;
+    private int w;
+    private int h;
     private int rectX;
     private int rectY;
     private int resId;
+    private long twinkleFrame;
 
     private int frame = -1;
     static private ArrayList<Bitmap> destroyAnimSheet = null;
@@ -41,6 +41,7 @@ public class GameObject {
     public void update(long frameTimeNanos) {
         if(firstUpdate){
             frameNanos = frameTimeNanos;
+            twinkleFrame = frameTimeNanos;
             firstUpdate = false;
         }
 
@@ -53,19 +54,46 @@ public class GameObject {
                 frameNanos = frameTimeNanos;
             }
         }
+
+        if(this.status == Status.found){
+            if(frameTimeNanos - twinkleFrame > 50000000){
+                if(this.paint.getColor() == Color.CYAN){
+                    this.paint.setColor(Color.DKGRAY);
+                }
+                else if(this.paint.getColor() == Color.RED){
+                    status = Status.normal;
+                }
+                else{
+                    this.paint.setColor(Color.CYAN);
+                }
+                twinkleFrame = frameTimeNanos;
+            }
+        }
+    }
+
+    public void setResId(int resId){
+        this.resId = resId;
+        this.bitmap = BitmapFactory.decodeResource(resources, resId);
+        bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true);
+    }
+    public int getResId(){
+        return this.resId;
     }
 
     public Status getStatus() {
         return this.status;
     }
 
-    public enum Status{normal, selected, destroyed, dead, END}
+    public enum Status{normal, found, destroyed, dead, END}
     GameObject(Resources resources, int resId, int x, int y, int width, int height){
+        this.resources = resources;
         this.bitmap = BitmapFactory.decodeResource(resources, resId);
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
 
         this.x = x;
         this.y = y;
+        this.w = width;
+        this.h = height;
 
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
