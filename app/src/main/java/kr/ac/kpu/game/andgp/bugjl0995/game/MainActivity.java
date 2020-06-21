@@ -19,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         GameView gameView = findViewById(R.id.gameScreenView);
-        TextView htv = findViewById(R.id.highInterface);
-        gameView.hInterface = htv;
+        TextView hInterface = findViewById(R.id.highInterface);
+        gameView.hInterface = hInterface;
 //        findViewById(R.id.lowInterface);
 
         resources = getResources();
