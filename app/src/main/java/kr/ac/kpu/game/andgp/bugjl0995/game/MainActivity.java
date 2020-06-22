@@ -31,8 +31,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         GameView gameView = findViewById(R.id.gameScreenView);
-        TextView hInterface = findViewById(R.id.highInterface);
-        gameView.hInterface = hInterface;
+        TextView hInterfaceh = findViewById(R.id.score);
+        gameView.hInterfaceh = hInterfaceh;
+        TextView hInterfacel = findViewById(R.id.dstroyable);
+        gameView.hInterfacel = hInterfacel;
         ImageButton itemFindglass = findViewById(R.id.lowInterface).findViewById(R.id.findglass);
         gameView.addItem(itemFindglass);
         ImageButton itemBomb = findViewById(R.id.lowInterface).findViewById(R.id.bomb);

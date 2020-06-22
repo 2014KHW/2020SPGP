@@ -7,12 +7,26 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
+    <LinearLayout
         android:id="@+id/highInterface"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@drawable/background_pattern"/>
+        android:orientation="vertical"
+        android:background="@drawable/background_pattern">
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+        <TextView
+            android:id="@+id/dstroyable"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
 
     <kr.ac.kpu.game.andgp.bugjl0995.game.GameView
         android:id="@+id/gameScreenView"

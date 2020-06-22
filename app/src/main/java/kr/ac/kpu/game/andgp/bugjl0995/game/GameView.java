@@ -44,7 +44,8 @@ public class GameView extends View {
     //    static private ArrayList<GameObject> tiles = new ArrayList<>();
     public final int MAX_ROW = 10;
     public final int MAX_COLUMN = 9;
-    public TextView hInterface = null;
+    public TextView hInterfaceh = null;
+    public TextView hInterfacel = null;
     public int windowWidth;
     public int windowHeight;
 
@@ -200,10 +201,12 @@ public class GameView extends View {
             canvas.drawBitmap(timeLimitBitmap, timeSrcRect, timeDstRect, null);
         }
 
-        if(hInterface != null){
-            hInterface.setTextColor(Color.YELLOW);
-            hInterface.setText("Score : " + this.score);
+        if(hInterfacel != null){
+            hInterfaceh.setTextColor(Color.YELLOW);
+            hInterfaceh.setText("Score : " + this.score);
 //            Log.d(TAG, "Score : " + this.score);
+            hInterfacel.setTextColor(Color.YELLOW);
+            hInterfacel.setText("destoyable tiles : " + tileDestroyable.size() / 2);
         }
     }
 
@@ -556,11 +559,13 @@ public class GameView extends View {
         ArrayList<GameObject> samePictures  = new ArrayList<>();
         samePictures.add(randomTile);
         for(int y = 0; y < MAX_COLUMN; y++){
-            for(int x = 0; x < MAX_COLUMN; x++){
+            for(int x = 0; x < MAX_ROW; x++){
                 GameObject currentTile = tileFind(x, y);
                 if(currentTile == null)continue;
-                if(currentTile.getX() == randomTile.getX() &&
-                currentTile.getY() == randomTile.getY())continue;
+                if(currentTile.getStatus() == GameObject.Status.dead
+                 || currentTile.getStatus() == GameObject.Status.destroyed)continue;
+                if(currentTile.getX() == randomTile.getX() && currentTile.getY() == randomTile.getY())
+                    continue;
                 if(currentTile.getResourceId() == randomTile.getResourceId())
                     samePictures.add(currentTile);
             }
@@ -719,7 +724,9 @@ public class GameView extends View {
         Random random = new Random(System.currentTimeMillis());
         ArrayList<Integer> initPositions = new ArrayList<>();
         int maxSize = MAX_ROW * MAX_COLUMN;
+
         while(initPositions.size() < maxSize * 2 / 3){
+//        while(initPositions.size() < 2){
             int nextPosition = random.nextInt(maxSize);
             while(initPositions.contains(nextPosition)){
                 nextPosition = random.nextInt(maxSize);
