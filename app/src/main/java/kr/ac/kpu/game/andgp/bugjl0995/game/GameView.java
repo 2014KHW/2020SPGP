@@ -322,6 +322,10 @@ public class GameView extends View {
     private void onTouchGameclear(MotionEvent event) {
         gameState = GameState.menu;
         addHighscore(score);
+        tileObjectMap = new HashMap<>();
+        tileDestroyable = new ArrayList<>();
+        setTiles();
+        getDestroyableTiles();
     }
 
     private void addHighscore(int score) {
@@ -335,8 +339,13 @@ public class GameView extends View {
         Collections.sort(highscores, new Descending());
     }
 
+
     private void onTouchGameover(MotionEvent event) {
         gameState = GameState.menu;
+        tileObjectMap = new HashMap<>();
+        tileDestroyable = new ArrayList<>();
+        setTiles();
+        getDestroyableTiles();
     }
 
     private void onTouchMenu(MotionEvent event) {
@@ -349,8 +358,8 @@ public class GameView extends View {
         int downX = (int)event.getX();
         int downY = (int)event.getY();
         int downIndexX = downX / (windowWidth / MAX_ROW);
-        int downIndexY = downY / (windowHeight / MAX_COLUMN);
-//                Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
+        int downIndexY = downY / (windowHeight / (MAX_COLUMN + 1));
+        Log.d(TAG, "MouseButtonDown! Index : (" + downIndexX + ", " + downIndexY + ") ");
 
         GameObject currentTile = tileFind(downIndexX, downIndexY);
 
@@ -379,6 +388,8 @@ public class GameView extends View {
                         forceDestroy = true;
                         break;
                     }
+                    if(forceDestroy)
+                        break;
                 }
                 if(forceDestroy)
                     return;
@@ -494,6 +505,8 @@ public class GameView extends View {
                 getDestroyableTiles();
                 break;}
         }
+
+        destroyCombo = 0;
     }
 
     private ArrayList<GameObject> getAllTiles() {
@@ -668,6 +681,39 @@ public class GameView extends View {
                     }
                 }
             }
+        }
+    }
+
+    public void setTiles(){
+        Random random = new Random(System.currentTimeMillis());
+        ArrayList<Integer> initPositions = new ArrayList<>();
+        int maxSize = MAX_ROW * MAX_COLUMN;
+        while(initPositions.size() < maxSize * 2 / 3){
+            int nextPosition = random.nextInt(maxSize);
+            while(initPositions.contains(nextPosition)){
+                nextPosition = random.nextInt(maxSize);
+            }
+            int anotherNextPosition = random.nextInt(maxSize);
+            while(initPositions.contains(anotherNextPosition) || anotherNextPosition == nextPosition){
+                anotherNextPosition = random.nextInt(maxSize);
+            }
+
+            initPositions.add(nextPosition);
+            initPositions.add(anotherNextPosition);
+        }
+
+        int mipmapIndex = random.nextInt(MainActivity.mipmaps.size());
+        int even = 0;
+        for(int i : initPositions){
+            if(even == 0){
+                mipmapIndex = random.nextInt(MainActivity.mipmaps.size());
+            }
+            int tileWidth = windowWidth / MAX_ROW;
+            int tileHeight = windowHeight / (MAX_COLUMN + 1);
+            Log.d(TAG, "new gameObject position is : " + i % MAX_ROW + ", " + i / MAX_ROW);
+            addTile(new GameObject(getResources(), MainActivity.mipmaps.get(mipmapIndex),
+                    i % MAX_ROW, i / MAX_ROW, tileWidth, tileHeight));
+            even = (even + 1) % 2;
         }
     }
 }
