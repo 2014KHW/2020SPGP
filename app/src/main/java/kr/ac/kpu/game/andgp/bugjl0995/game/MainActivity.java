@@ -3,6 +3,7 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
         import androidx.appcompat.app.AppCompatActivity;
 
         import android.content.res.Resources;
+        import android.media.MediaPlayer;
         import android.os.Bundle;
         import android.util.Log;
         import android.view.Gravity;
@@ -21,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     public static HashMap<Integer, Integer> mipmaps;
 
     public static final String TAG = MainActivity.class.getSimpleName();
+
+    public static SoundEffects soundEffects;
+    private MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,13 @@ public class MainActivity extends AppCompatActivity {
         gameView.getDestroyableTiles();
 
 
+        mp = MediaPlayer.create(this, R.raw.broken_toy);
+        mp.setLooping(true);
+        mp.start();
 
+        soundEffects = new SoundEffects();
+        soundEffects.init(this);
+        soundEffects.loadAll();
     }
 
     public HashMap<Integer, Integer> initMipmapOfMap(){

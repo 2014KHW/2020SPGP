@@ -125,33 +125,11 @@ public class GameView extends View {
 
     private void onDrawGameclear(Canvas canvas) {
 
-        if(showScoreBoard){
-//            LinearLayout highscoreBoards = new LinearLayout(this);
-//            highscoreBoards.setOrientation(LinearLayout.VERTICAL);
-//            LinearLayout.LayoutParams layout_p = new LinearLayout.LayoutParams(
-//                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-//            addHighscore(1100);
-//            addHighscore(1200);
-//            addHighscore(1100);
-//            addHighscore(1500);
-//            addHighscore(2000);
-//
-//            LinearLayout.LayoutParams layout_w = new LinearLayout.LayoutParams(
-//                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//            TextView tv = new TextView();
-//            tv.setText("" + highscores.get(0));
-//            tv.setLayoutParams(layout_w);
-//            tv.setGravity(Gravity.CENTER);
-//            tv.setTextSize(32);
-//            highscoreBoards.addView(tv);
-        }
-        else{
-            Bitmap gameclearBitmap = gameStateBitmap.get(2);
-            Rect srcRect = new Rect(0, 0,
-                    gameclearBitmap.getWidth(), gameclearBitmap.getHeight());
-            Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
-            canvas.drawBitmap(gameclearBitmap, srcRect, dstRect, null);
-        }
+        Bitmap gameclearBitmap = gameStateBitmap.get(2);
+        Rect srcRect = new Rect(0, 0,
+                gameclearBitmap.getWidth(), gameclearBitmap.getHeight());
+        Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
+        canvas.drawBitmap(gameclearBitmap, srcRect, dstRect, null);
     }
 
     private void onDrawGameover(Canvas canvas) {
@@ -248,6 +226,7 @@ public class GameView extends View {
         }
         else{
             timeLimit = (long)1000000000 * 100;
+            updateTime = true;
         }
     }
 
@@ -424,6 +403,7 @@ public class GameView extends View {
                         this.score += 100 * destroyCombo;
                         updateTime = true;
                         forceDestroy = true;
+                        MainActivity.soundEffects.play(R.raw.crush);
                         break;
                     }
                     if(forceDestroy)
@@ -442,6 +422,7 @@ public class GameView extends View {
                 this.score += 100 * destroyCombo;
                 destroyTile = true;
                 updateTime = true;
+                MainActivity.soundEffects.play(R.raw.ontouch);
                 return;
             }
             else{
@@ -486,6 +467,9 @@ public class GameView extends View {
     }
 
     private void useItem(int index) {
+
+        MainActivity.soundEffects.play(R.raw.combo);
+
         switch (index){
             case 0:{
                 GameObject randomTile = null;
