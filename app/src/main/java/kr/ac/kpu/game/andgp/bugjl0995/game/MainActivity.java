@@ -5,6 +5,7 @@ package kr.ac.kpu.game.andgp.bugjl0995.game;
         import android.content.res.Resources;
         import android.os.Bundle;
         import android.util.Log;
+        import android.view.Gravity;
         import android.view.View;
         import android.widget.Button;
         import android.widget.ImageButton;
@@ -37,30 +38,12 @@ public class MainActivity extends AppCompatActivity {
 //        findViewById(R.id.lowInterface);
 
         resources = getResources();
-
-//        int tileWidth = gameView.windowWidth / gameView.MAX_ROW;
-//        int tileHeight = gameView.windowHeight / gameView.MAX_COLUMN;
-//        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 1, 1, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.crocodile, 2, 1, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 2, 0, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 2, 2, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.deer, 1, 2, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.deer, 3, 2, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.deer, 0, 2, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.deer, 0, 1, tileWidth, tileHeight));
-//
-//        gameView.addTile(new GameObject(resources, R.mipmap.duck, 4, 4, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.duck, 5, 7, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.lion, 7, 6, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.lion, 6, 6, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 5, 6, tileWidth, tileHeight));
-//        gameView.addTile(new GameObject(resources, R.mipmap.cameleon, 5, 1, tileWidth, tileHeight));
-
-
         mipmaps = initMipmapOfMap();
-//        setTiles(gameView);
         gameView.setTiles();
         gameView.getDestroyableTiles();
+
+
+
     }
 
     public HashMap<Integer, Integer> initMipmapOfMap(){

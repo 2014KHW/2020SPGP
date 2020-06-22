@@ -16,11 +16,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Choreographer;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -61,12 +63,13 @@ public class GameView extends View {
     private long currentTimeNanos;
 
     private int score;
-    private ArrayList<Integer> highscores = new ArrayList<>();
+    public ArrayList<Integer> highscores = new ArrayList<>();
 
     private GameState gameState;
     static private ArrayList<Bitmap> gameStateBitmap = new ArrayList<>();
 
     private ArrayList<ImageButton> itemList = new ArrayList<>();
+    private boolean showScoreBoard=false;
 
     enum GameState{menu, gaming, gameover, gameclear}
 
@@ -121,11 +124,34 @@ public class GameView extends View {
     }
 
     private void onDrawGameclear(Canvas canvas) {
-        Bitmap gameclearBitmap = gameStateBitmap.get(2);
-        Rect srcRect = new Rect(0, 0,
-                gameclearBitmap.getWidth(), gameclearBitmap.getHeight());
-        Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
-        canvas.drawBitmap(gameclearBitmap, srcRect, dstRect, null);
+
+        if(showScoreBoard){
+//            LinearLayout highscoreBoards = new LinearLayout(this);
+//            highscoreBoards.setOrientation(LinearLayout.VERTICAL);
+//            LinearLayout.LayoutParams layout_p = new LinearLayout.LayoutParams(
+//                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+//            addHighscore(1100);
+//            addHighscore(1200);
+//            addHighscore(1100);
+//            addHighscore(1500);
+//            addHighscore(2000);
+//
+//            LinearLayout.LayoutParams layout_w = new LinearLayout.LayoutParams(
+//                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//            TextView tv = new TextView();
+//            tv.setText("" + highscores.get(0));
+//            tv.setLayoutParams(layout_w);
+//            tv.setGravity(Gravity.CENTER);
+//            tv.setTextSize(32);
+//            highscoreBoards.addView(tv);
+        }
+        else{
+            Bitmap gameclearBitmap = gameStateBitmap.get(2);
+            Rect srcRect = new Rect(0, 0,
+                    gameclearBitmap.getWidth(), gameclearBitmap.getHeight());
+            Rect dstRect = new Rect(0, 0, windowWidth, windowHeight);
+            canvas.drawBitmap(gameclearBitmap, srcRect, dstRect, null);
+        }
     }
 
     private void onDrawGameover(Canvas canvas) {
@@ -148,6 +174,7 @@ public class GameView extends View {
         if (tileObjectMap.size() <= 0)
             return;
 
+        ArrayList<GameObject> foundTiles = new ArrayList<>();
         for(int y = 0; y < MAX_COLUMN; y++){
             for(int x = 0; x < MAX_ROW; x++){
                 HashMap<Integer, GameObject> columnMap = tileObjectMap.get(x);
@@ -157,9 +184,14 @@ public class GameView extends View {
                 if(currentObject == null)
                     continue;
                 currentObject.draw(canvas, this);
+                if(currentObject.getStatus() == GameObject.Status.found)
+                    foundTiles.add(currentObject);
             }
         }
 
+        for(GameObject o : foundTiles){
+            o.draw(canvas, this);
+        }
         if(selectedTile != null)
             selectedTile.draw(canvas, this);
 
@@ -320,15 +352,21 @@ public class GameView extends View {
     }
 
     private void onTouchGameclear(MotionEvent event) {
-        gameState = GameState.menu;
-        addHighscore(score);
-        tileObjectMap = new HashMap<>();
-        tileDestroyable = new ArrayList<>();
-        setTiles();
-        getDestroyableTiles();
+        if(showScoreBoard == true){
+            showScoreBoard = false;
+            addHighscore(score);
+            tileObjectMap = new HashMap<>();
+            tileDestroyable = new ArrayList<>();
+            setTiles();
+            getDestroyableTiles();
+            gameState = GameState.menu;
+        }
+        else{
+            showScoreBoard = true;
+        }
     }
 
-    private void addHighscore(int score) {
+    public void addHighscore(int score) {
         if(highscores.size() < 10){
             highscores.add(score);
         }
@@ -451,34 +489,32 @@ public class GameView extends View {
         switch (index){
             case 0:{
                 GameObject randomTile = null;
-                while(randomTile == null){
-                    Random randNum = new Random(System.currentTimeMillis());
-                    int x = randNum.nextInt(MAX_COLUMN);
-                    int y = randNum.nextInt(MAX_ROW);
-                    randomTile = tileFind(x, y);
+                ArrayList<GameObject> sameTiles = null;
+                int tileindex = -1;
+                while(tileindex == -1){
+                    randomTile = getRandomTile();
+                    sameTiles = findSamePictureTile(randomTile);
+
+                    for(GameObject o : sameTiles){
+                        tileindex = tileDestroyable.indexOf(new Pair(randomTile, o));
+                        if(tileindex == -1){
+                            continue;
+                        }
+                        else{
+                            randomTile.setStatus(GameObject.Status.found);
+                            randomTile.unselectImage();
+                            o.setStatus(GameObject.Status.found);
+                            o.unselectImage();
+                            if(selectedTile == randomTile || selectedTile == o)
+                                selectedTile = null;
+                            break;
+                        }
+                    }
                 }
-                ArrayList<GameObject> sameTiles = findSamePictureTile(randomTile);
-                Random randNum = new Random(System.currentTimeMillis());
-                int one = randNum.nextInt(sameTiles.size());
-                int two = one;
-                while(one == two){
-                    two = randNum.nextInt(sameTiles.size());
-                }
-                sameTiles.get(one).setStatus(GameObject.Status.found);
-                sameTiles.get(one).unselectImage();
-                sameTiles.get(two).setStatus(GameObject.Status.found);
-                sameTiles.get(one).unselectImage();
-                if(selectedTile == sameTiles.get(one) || selectedTile == sameTiles.get(two))
-                    selectedTile = null;
                 break;}
             case 1:{
                 GameObject randomTile = null;
-                while(randomTile == null){
-                    Random randNum = new Random(System.currentTimeMillis());
-                    int x = randNum.nextInt(MAX_COLUMN);
-                    int y = randNum.nextInt(MAX_ROW);
-                    randomTile = tileFind(x, y);
-                }
+                randomTile = getRandomTile();
                 ArrayList<GameObject> sameTiles = findSamePictureTile(randomTile);
                 Random randNum = new Random(System.currentTimeMillis());
                 int one = randNum.nextInt(sameTiles.size());
@@ -507,6 +543,17 @@ public class GameView extends View {
         }
 
         destroyCombo = 0;
+    }
+
+    private GameObject getRandomTile() {
+        GameObject randomTile = null;
+        while (randomTile == null) {
+            Random randNum = new Random(System.currentTimeMillis());
+            int x = randNum.nextInt(MAX_COLUMN);
+            int y = randNum.nextInt(MAX_ROW);
+            randomTile = tileFind(x, y);
+        }
+        return randomTile;
     }
 
     private ArrayList<GameObject> getAllTiles() {
